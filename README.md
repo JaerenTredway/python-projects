@@ -1,2 +1,2 @@
 # python-projects
-My python projects at CNM.
+My python learning projects.
