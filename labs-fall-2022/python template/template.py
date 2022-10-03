@@ -17,7 +17,7 @@ def display_header():
 
 def continue_loop():
     '''Asks user if they want to continue.'''
-    user_input = input("Do you want to continue? ")
+    user_input = input("\nDo you want to continue? ")
     # this cleans the input so that any version of 'yes' works:
     do_continue = user_input.strip()[0].lower() == 'y'
     # and returns a boolean value:
@@ -25,7 +25,7 @@ def continue_loop():
 
 def display_footer(program):
     '''Displays a farewell at the end of the program.'''
-    print(f"Thanks for using {program}!")
+    print(f"\nThanks for using {program}!")
 
 
 #Main*****************************
