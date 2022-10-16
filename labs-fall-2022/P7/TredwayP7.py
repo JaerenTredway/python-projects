@@ -1,77 +1,89 @@
 # TredwayP7
 # Programmer: Will Tredway (Jaeren William Tredway)
 # EMail: jtredway@cnm.edu
-# Purpose: 
-# Notes: 
-# Reference/ research: 
-#   
+# Purpose: This program will get the coordinates of your home location,
+#   and two other remote locations, and tell you which point you are 
+#   closest to.
 
 #**** IMPORT MODULES: ****
 from math import radians, sqrt, sin, cos, asin
 
 #**** GLOBAL VARIABLES: **** (are capitalized)
-Program_name = "Program Name"
+Program_name = "GeoPoint Distance Finder"
 
 #**** CLASS DEFINITIONS: ****
-class Person:
+class GeoPoint:
     #constructor to initialize class attributes:
     def __init__(self):
-        self.name = "unknown"
+        self.lat = 0.00
+        self.long = 0.00
+        self.description = ""
 
     #class methods:    
-    def set_name(self,name):
-        self.name = name
-    def get_name(self):
-        return self.name
-    def greet(self):
-        print(f"Hello World! My name is {self.name}.")
-
-class Animal:
-    #constructor to initialize class attributes:
-    def __init__(self):
-        self.description = "generic animal"
-        self.noise = "generic animal sound"
-        self.name = "unknown"
-
-    #class methods:  
-    def set_name(self,name):
-        self.name = name
-    def get_name(self):
-        return self.name
-    def set_description(self,description):
+    def set_lat(self,lat):
+        self.lat = lat
+    def set_long(self,long):
+        self.long = long
+    def set_description(self, description):
         self.description = description
+    def get_lat(self):
+        return (self.lat)
+    def get_long(self):
+        return(self.long)
+    def get_point(self):
+        return self.lat, self.long
     def get_description(self):
         return self.description
-    def make_noise(self):
-        print(self.noise)
+    def calc_distance(self,other_lat,other_long):
+        '''
+        Uses the Haversine Formula to find the distance 
+        between two locations in km.
+        '''
+        # assign decimal degrees from args:
+        lat1 = self.lat
+        long1 = self.long
+        lat2 = other_lat
+        long2 = other_long
+        # convert decimal degrees into radians:
+        lat1, long1, lat2, long2 = map(radians, [lat1,long1,lat2,long2])
+        # get latitudinal and logitudinal differences:
+        d_lat = lat2 - lat1
+        d_long = long2 - long1
+        # Haversine Formula:
+        a = sin(d_lat/2)**2 + cos(lat1) * cos(lat2) * sin(d_long/2)**2
+        c = 2 * asin(sqrt(a))
+        r = 6371 # radius of Earth in km
+        distance = c * r
+        return round(distance,2)
+    def input_location(self,ordinal):
+        '''
+        Asks the user for a location's latitiude and longitude,
+        and sets the object's lat and long. 'ordinal' is the 
+        location's order in the sequnce (first, second).
+        '''
+        print(f"\n(Enter your {ordinal} data set in decimal degrees:)")
+        self.set_lat(float(input(f"Enter {ordinal} location's latitude: ")))
+        self.set_long(float(input(f"Enter {ordinal} location's longitude: ")))
+        return self.lat,self.long
+    def display_closest_point(self, first_location_name, second_location_name, distance_to_first, distance_to_second):
+        if distance_to_first < distance_to_second:
+            print(f"You are closest to {first_location_name}")
+            print(f"which is {distance_to_first} km away")
+        else:
+            print(f"You are closest to {second_location_name}")
+            print(f"which is {distance_to_second} km away")
 
-# inheritance:
-class Lion(Animal):
-    pass
 
-    #or add additional methods here:
-    def sleep(self):
-        print("I am sleeping.")
-    
-    #over-ride super-class:
-    def get_description(slef):
-        return("I am a lion.")
-    
-    # use superclass method:
-    #def get_stuff(self):
-        #return super().get_description()
-
-
-# FUNCTION DEFINITIONS *************
- 
+#**** FUNCTION DEFINITIONS FOR USER INTERFACE: ****
 def display_header():
     '''
     Displays program introduction for the user.
     '''
     print("\n*****************************")
     print(Program_name.upper())
-    print("This program will get 2 locations from you,")
-    print("and then display the distance between them.")
+    print("This program will get the coordinates of your home location,")
+    print("and two other remote locations,")
+    print("and tell you which one you are closest to.")
 
 def continue_loop():
     '''
@@ -79,48 +91,15 @@ def continue_loop():
     '''
     user_input = input("\nDo you want to continue? ")
     # this cleans the input so that any version of 'yes' works:
-    do_continue = user_input.strip()[0].lower() == 'y'
-    # and returns a boolean value:
-    return do_continue
-
-def get_location(ordinal):
-    '''
-    Asks the user for a location's latitiude and longitude,
-    and returns a tuple with them. 'Ordinal' is the 
-    location's order in the sequnce (first, second).
-    '''
-    print(f"\n(Enter your {ordinal} data set in decimal degrees:)")
-    location_lat = float(input(f"Enter {ordinal} location's latitude: "))
-    location_long = float(input(f"Enter {ordinal} location's longitude: "))
-    return location_lat,location_long
-
-def distance_between(first_location,second_location):
-    '''
-    Uses the Haversine Formula to find the distance 
-    between two locations in km.
-    '''
-    # assign decimal degrees from args:
-    lat1 = first_location[0]
-    long1 = first_location[1]
-    lat2 = second_location[0]
-    long2 = second_location[1]
-    # convert decimal degrees into radians:
-    lat1, long1, lat2, long2 = map(radians, [lat1,long1,lat2,long2])
-    # get latitudinal and logitudinal differences:
-    d_lat = lat2 - lat1
-    d_long = long2 - long1
-    # Haversine Formula:
-    a = sin(d_lat/2)**2 + cos(lat1) * cos(lat2) * sin(d_long/2)**2
-    c = 2 * asin(sqrt(a))
-    r = 6371 # radius of Earth in km
-    distance = c * r
-    return round(distance,2)
+    if len(user_input) > 0:
+        return user_input.strip()[0].lower() == 'y'
+    else: return False
 
 def display_distance(first_location, second_location, distance):
     '''
-    Displays two loactions and the distance between them.
+    Displays two locations and the distance between them.
     '''
-    print(f"The distance between {first_location} and {second_location} is {distance} km.")  
+    print(f"\nThe distance between {first_location} and {second_location} is {distance} km.")  
 
 def display_footer(program):
     '''
@@ -129,34 +108,37 @@ def display_footer(program):
     print(f"\nThanks for using {program}!")
 
 
-# MAIN PROGRAM *****************************
- 
+#**** MAIN PROGRAM: ****
 display_header()
-
-person_one = Person()
-person_one.set_name("Luke Skywalker")
-print(person_one.name)
-print(person_one.get_name())
-person_one.greet()
-person_two = Person()
-person_two.greet()
-print()
-
-lion_1 = Lion()
-lion_1.set_name("Leo")
-print(f"My name is {lion_1.get_name()}")
-print(lion_1.get_description())
-lion_1.make_noise()
-lion_1.sleep()
 
 # Create an infinite while-loop, which the user can
 #   continue or break out of:
 while True:
-    Location_1 = get_location("first")
-    Location_2 = get_location("second")
-    print(f"\nYou entered: {Location_1} and {Location_2}\n")
-    Distance = distance_between(Location_1,Location_2)
-    display_distance(Location_1, Location_2, Distance)
+    #instatiate a home point and two other points:
+    home = GeoPoint()
+    location_1 = GeoPoint()
+    location_2 = GeoPoint()
+
+    #assign values to the three points:
+    home.input_location("home")
+    location_1.input_location("first")
+    location_1.set_description(input("and it's name: "))
+    location_2.input_location("second")
+    location_2.set_description(input("and it's name: "))
+
+    #report the remote points that were entered:
+    print(f"\nYou entered:")
+    print(f"{location_1.get_description()}: ({location_1.get_lat()}, {location_1.get_long()}) and")
+    print(f"{location_2.get_description()}: ({location_2.get_lat()}, {location_2.get_long()})\n")
+
+    #calculate the distrances from home to the two other points:
+    distance_to_one = home.calc_distance(location_1.get_lat(),location_1.get_long())
+    distance_to_two = home.calc_distance(location_2.get_lat(),location_2.get_long())
+
+    #tell the user which point they are closest to:
+    home.display_closest_point(location_1.get_description(),location_2.get_description(),distance_to_one,distance_to_two)
+    
+    #continue or stop:
     if not continue_loop(): break
 
 display_footer(Program_name)
