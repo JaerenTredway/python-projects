@@ -7,9 +7,10 @@
 
 #**** IMPORT MODULES: ****
 from math import radians, sqrt, sin, cos, asin
+from operator import index, indexOf
 
 #**** GLOBAL VARIABLES: **** (are capitalized)
-Program_name = "GeoPoint Distance Finder WITH Error Handling"
+Program_name = "GeoPoint Distance Finder WITH Error Handling AND File Reading"
 
 #**** CLASS DEFINITIONS: ****
 class GeoPoint:
@@ -34,10 +35,11 @@ class GeoPoint:
         return self.lat, self.long
     def get_description(self):
         return self.description
+
     def calc_distance(self,other_lat,other_long):
         '''
         Uses the Haversine Formula to find the distance 
-        between two locations in km.
+        between two locations on a sphere (in km).
         '''
         # assign decimal degrees from args:
         lat1 = self.lat
@@ -55,6 +57,7 @@ class GeoPoint:
         r = 6371 # radius of Earth in km
         distance = c * r
         return round(distance,2)
+
     def input_location(self,ordinal):
         '''
         Asks the user for a location's latitiude and longitude,
@@ -65,13 +68,20 @@ class GeoPoint:
         self.set_lat(float(input(f"Enter {ordinal} location's latitude: ")))
         self.set_long(float(input(f"Enter {ordinal} location's longitude: ")))
         return self.lat,self.long
-    def display_closest_point(self, first_location_name, second_location_name, distance_to_first, distance_to_second):
-        if distance_to_first < distance_to_second:
-            print(f"You are closest to {first_location_name}")
-            print(f"which is {distance_to_first} km away")
-        else:
-            print(f"You are closest to {second_location_name}")
-            print(f"which is {distance_to_second} km away")
+
+    def display_closest_point(self, location_list, distance_to_points_list):
+        '''
+        Finds the shortest distance in a list of distnaces, and displays 
+        that indice's location from the location_list.
+        '''
+        shortest_distance = min(distance_to_points_list)
+        index_of_closest_point = distance_to_points_list.index(shortest_distance)
+        print('\nThe closest point to you is: ')
+        print(location_list[index_of_closest_point].get_description())
+        print('Which is located at: ')
+        print(f'[{location_list[index_of_closest_point].get_lat()}, {location_list[index_of_closest_point].get_long()}]')
+
+#**** END Class GeoPoint ****
 
 
 #**** FUNCTION DEFINITIONS FOR USER INTERFACE: ****
@@ -81,9 +91,9 @@ def display_header():
     '''
     print("\n*****************************")
     print(Program_name.upper())
-    print("This program will get the coordinates of your home location,")
-    print("and two other remote locations,")
-    print("and tell you which one you are closest to.")
+    print("This program will get the coordinates of your current location,")
+    print("then read five other remote locations from a file,")
+    print("and then tell you which one you are closest to.")
 
 def continue_loop():
     '''
@@ -124,7 +134,7 @@ while True:
 
     #get user input for the value of the home point:
     try:
-        home.input_location("home")
+        home.input_location("current")
     except TypeError:
         print("Wrong type of input!")
         continue
@@ -137,27 +147,40 @@ while True:
 
     #read in the five other points from a file:
     try:
-        open('/Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P9/five_locations.txt')
+        f = open('/Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P9/five_locations.txt')
     except FileNotFoundError:
-        print('You need to change the code at line 130 to have the')
+        print('\nERROR:You need to change the code at line 150 to have the')
         print('correct full path and file name for the file where you')
         print('are storing the five locations.')
-        continue
+        quit()
     except Exception as e:
         print("Something went wrong: ", e)
-        continue
+        quit()
+    location_list = []
+    with f as filestream:
+        for line in filestream:
+            current_line = line.split(',')
+            new_point = GeoPoint()
+            new_point.set_lat(float(current_line[0]))
+            new_point.set_long(float(current_line[1]))
+            new_point.set_description(current_line[2][:-1])
+            location_list.append(new_point)
 
-    #report the remote points that were entered:
-    print(f"\nYou entered:")
-    print(f"{location_1.get_description()}: ({location_1.get_lat()}, {location_1.get_long()}) and")
-    print(f"{location_2.get_description()}: ({location_2.get_lat()}, {location_2.get_long()})\n")
+    #report the five remote points that were read in from the file:
+    print("\nThe five remote locations that were read from the file are:")
+    print(f"{location_list[0].get_description()}: ({location_list[0].get_lat()}, {location_list[0].get_long()})")
+    print(f"{location_list[1].get_description()}: ({location_list[1].get_lat()}, {location_list[1].get_long()})")
+    print(f"{location_list[2].get_description()}: ({location_list[2].get_lat()}, {location_list[2].get_long()})")
+    print(f"{location_list[3].get_description()}: ({location_list[3].get_lat()}, {location_list[3].get_long()})")
+    print(f"{location_list[4].get_description()}: ({location_list[4].get_lat()}, {location_list[4].get_long()})")
 
-    #calculate the distrances from home to the two other points:
-    distance_to_one = home.calc_distance(location_1.get_lat(),location_1.get_long())
-    distance_to_two = home.calc_distance(location_2.get_lat(),location_2.get_long())
+    #calculate the distances from home to the five other points and store in a list:
+    distances_to_five_points = []
+    for x in range(5):
+        distances_to_five_points.append(home.calc_distance(location_list[x].get_lat(),location_list[x].get_long()))
 
     #tell the user which point they are closest to:
-    home.display_closest_point(location_1.get_description(),location_2.get_description(),distance_to_one,distance_to_two)
+    home.display_closest_point(location_list,distances_to_five_points)
     
     #continue or stop:
     if not continue_loop(): break
