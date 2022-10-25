@@ -147,10 +147,11 @@ while True:
 
     #read in the five other points from a file:
     try:
-        f = open('/Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P9/five_locations.txt')
+        f = open('five_locations.txt', 'r')
+        # f = open('/Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P9/five_locations.txt', 'r')
     except FileNotFoundError:
         print('\nERROR:You need to change the code at line 150 to have the')
-        print('correct full path and file name for the file where you')
+        print('correct full path for the file where you')
         print('are storing the five locations.')
         quit()
     except Exception as e:
