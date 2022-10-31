@@ -1,17 +1,20 @@
 # TredwayP10
 # Programmer: Will Tredway (Jaeren William Tredway)
 # EMail: jtredway@cnm.edu
-# Purpose: This program will make a GUI to get the coordinates 
-#   of your home location, then get two other locations and write 
-#   them to a file, then tell you which of those locations you are 
-#   closest to.
+# Purpose: This program will make a GUI and ask for the file path
+#   of the file that has a list of points, then it will get the 
+#   coordinates of your home location, then it will tell you 
+#   which of those locations you are closest to.
+# Reference to learn how to make GUI usuing tkinter:
+# https://www.youtube.com/watch?v=_PHJvjQJa3w&t=338s 
 
 #**** IMPORT MODULES: ****
 from math import radians, sqrt, sin, cos, asin
 from operator import index, indexOf
+from tkinter import *
 
 #**** GLOBAL VARIABLES: **** (are capitalized)
-Program_name = "GeoPoint Distance Finder WITH GUI"
+Program_name = "GeoFinder App"
 
 #**** CLASS DEFINITIONS: ****
 class GeoPoint:
@@ -84,7 +87,7 @@ class GeoPoint:
 #**** END Class GeoPoint ****
 
 
-#**** FUNCTION DEFINITIONS FOR USER INTERFACE: ****
+#**** FUNCTION DEFINITIONS FOR COMMMAND LINE: ****
 def display_header():
     '''
     Displays program introduction for the user.
@@ -117,13 +120,32 @@ def display_footer(program):
     '''
     print(f"\nThanks for using {program}!")
 
+#**** BUILD GUI: ****
+#create an instance of the Tk object and customize it:
+main_window = Tk()
+main_window.title("GeoFinder App")
+main_window.minsize(500,500)
 
-#**** MAIN PROGRAM: ****
-display_header()
+#display text labels:   (use grid() or pack() to add the item to the GUI window)
+Label(main_window, text="Welcome to the GeoFinder App!").grid(row=0,column=0)
+Label(main_window, text="Enter FULL PATH to your points list").grid(row=1,column=0)
+Label(main_window, text="(for example: /Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P9/five_locations.txt :").grid(row=2,column=0)
+Label(main_window, text="Enter your current latitude:").grid(row=3,column=0)
+Label(main_window, text="Enter your current longitude: ").grid(row=4,column=0)
 
-# Create an infinite while-loop, which the user can
-#   continue or break out of:
-while True:
+#display text input boxes:
+file_location = Entry(main_window,width=50,borderwidth=5)
+file_location.grid(row=2,column=1)
+home_lat = Entry(main_window,width=10,borderwidth=5)
+home_lat.grid(row=3,column=1)
+home_long = Entry(main_window,width=10,borderwidth=5)
+home_long.grid(row=4,column=1)
+
+#event listener function:
+def on_click():
+    Label(main_window, text=f"Your home latitude is: {home_lat.get()}").grid(row=5,column=0)
+    Label(main_window, text=f"Your home longitude is: {home_long.get()}").grid(row=6,column=0)
+
     #instatiate a home point and five other points:
     home = GeoPoint()
     location_1 = GeoPoint()
@@ -134,29 +156,43 @@ while True:
 
     #get user input for the value of the home point:
     try:
-        home.input_location("current")
+        if home_lat.get() == '':
+            my_lat == 0.0
+        else:
+            my_lat = home_lat.get()
+        home.set_lat(float(my_lat))
     except TypeError:
         print("Wrong type of input!")
-        continue
     except SystemError:
         print("There was a system error!")
-        continue
     except Exception as e:
         print("Something went wrong:", e)
-        continue
+
+    try:
+        if home_long.get() == '':
+            my_long = 0.0
+        else:
+            my_long = home_long.get()
+        home.set_long(float(my_long))
+    except TypeError:
+        print("Wrong type of input!")
+    except SystemError:
+        print("There was a system error!")
+    except Exception as e:
+        print("Something went wrong:", e)
 
     #read in the five other points from a file:
     try:
-        f = open('five_locations.txt', 'r')
-        # f = open('/Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P9/five_locations.txt', 'r')
+        # f = open('five_locations.txt', 'r')
+        # /Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P9/five_locations.txt
+        temp_file_location = file_location.get()
+        f = open(temp_file_location, 'r')
     except FileNotFoundError:
-        print('\nERROR:You need to change the code at line 150 to have the')
+        print('\nERROR:You need to enter the')
         print('correct full path for the file where you')
         print('are storing the five locations.')
-        quit()
     except Exception as e:
         print("Something went wrong: ", e)
-        quit()
     location_list = []
     with f as filestream:
         for line in filestream:
@@ -183,7 +219,11 @@ while True:
     #tell the user which point they are closest to:
     home.display_closest_point(location_list,distances_to_five_points)
     
-    #continue or stop:
-    if not continue_loop(): break
+#**** MAIN PROGRAM: ****
+#button for submitting the user input:
+Button(main_window,text="submit",width=10, command = on_click).grid(row=5,column=1)
+
+#run the event listener loop:
+main_window.mainloop()
 
 display_footer(Program_name)
