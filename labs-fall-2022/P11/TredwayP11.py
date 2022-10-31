@@ -13,7 +13,7 @@
 from math import radians, sqrt, sin, cos, asin
 from operator import index, indexOf
 from tkinter import *
-from sqlite3 import *
+import sqlite3
 
 #**** GLOBAL VARIABLES: **** (are capitalized)
 Program_name = "GeoFinder App"
@@ -103,46 +103,51 @@ class GeoPoint:
 #**** END Class GeoPoint ****
 
 
-#**** BUILD GUI: ****
-#create an instance of the Tk object and customize it:
-main_window = Tk()
-main_window.title("GeoFinder App")
-main_window.minsize(700,600)
+#**** FUNCTION DEFINITIONS: ****
 
-#display text labels:   
-'''
-use grid() or pack() to add the item to the GUI window
-use sticky=W to left justify (W means 'west')
-'''
-Label(main_window, text="Welcome to the GeoFinder App!", font=('Arial',25)).grid(row=0,column=0, sticky=W)
-Label(main_window, text="Enter the FULL PATH to your points list .txt file").grid(row=2,column=0, sticky=W)
-Label(main_window, text="Enter your current latitude:").grid(row=3,column=0, sticky=W)
-Label(main_window, text="Enter your current longitude: ").grid(row=4,column=0, sticky=W)
+def build_GUI():
+    '''
+    This function builds the main windoe=w of the GUI
+    with text Labels and text Entry boxes.
+    '''
 
-#set default file location:
-default_file_loc = StringVar(main_window, value='five_locations.txt')
+    #create an instance of the Tk object and customize it:
+    main_window = Tk()
+    main_window.title("GeoFinder App")
+    main_window.minsize(700,600)
 
-#set default home coordinates:
-default_lat = StringVar(main_window, value='0.0')
-default_long = StringVar(main_window, value='0.0')
+    #display text labels:   
+    '''
+    use grid() or pack() to add the item to the GUI window
+    use sticky=W to left justify (W means 'west')
+    '''
+    Label(main_window, text="Welcome to the GeoFinder App!", font=('Arial',25)).grid(row=0,column=0, sticky=W)
+    Label(main_window, text="Enter the FULL PATH to your points list .txt file").grid(row=2,column=0, sticky=W)
+    Label(main_window, text="Enter your current latitude:").grid(row=3,column=0, sticky=W)
+    Label(main_window, text="Enter your current longitude: ").grid(row=4,column=0, sticky=W)
 
-#display text input boxes:
-file_location = Entry(main_window,width=75,borderwidth=5,textvariable=default_file_loc)
-file_location.grid(row=2,column=1, sticky=W)
-home_lat = Entry(main_window,width=10,borderwidth=5,textvariable=default_lat)
-home_lat.grid(row=3,column=1, sticky=W)
-home_long = Entry(main_window,width=10,borderwidth=5,textvariable=default_long)
-home_long.grid(row=4,column=1, sticky=W)
-#*** END BASIC GUI SETUP ***
+    #set default file location:
+    default_file_loc = StringVar(main_window, value='five_locations.txt')
 
+    #set default home coordinates:
+    default_lat = StringVar(main_window, value='0.0')
+    default_long = StringVar(main_window, value='0.0')
 
-'''
-EVENT LISTENER 
-When the button is clicked, this function gets the user input, 
-gets the 5 other points from a file, makes the GeoPoint objects, finds the closest point to home, and reports it to the GUI.
-'''
+    #display text input boxes:
+    file_location = Entry(main_window,width=75,borderwidth=5,textvariable=default_file_loc)
+    file_location.grid(row=2,column=1, sticky=W)
+    home_lat = Entry(main_window,width=10,borderwidth=5,textvariable=default_lat)
+    home_lat.grid(row=3,column=1, sticky=W)
+    home_long = Entry(main_window,width=10,borderwidth=5,textvariable=default_long)
+    home_long.grid(row=4,column=1, sticky=W)
+#**** END GUI BUILDER ****
+
 def on_click():
-
+    '''
+    EVENT LISTENER 
+    When the button is clicked, this function gets the user input, 
+    gets the 5 other points from a file, makes the GeoPoint objects, finds the closest point to home, and reports it to the GUI.
+    '''
     Label(main_window, text=f"Your current latitude is: {home_lat.get()}").grid(row=6,column=0, sticky=W)
     Label(main_window, text=f"Your current longitude is: {home_long.get()}").grid(row=7,column=0, sticky=W)
 
@@ -229,8 +234,39 @@ def on_click():
     home.display_closest_point(location_list,distances_to_five_points)
 #**** END EVENT LISTENER FUNCTION which runs every time the button is clicked****
 
+def build_database():
+    '''
+    This function builds a database of locations with 
+    each place's latitude, longitude, and description.
+    '''
+    #make connection to database:
+    database_connection = sqlite3.connect("geopoint_database.db")
+
+    #make a cursor to execute SQL querries:
+    cursor_1 = database_connection.cursor()
+
+    #creat a table in the database:
+    cursor_1.execute('''
+    CREATE TABLE geo_points(
+        LatField FLOAT,
+        LongField FLOAT,
+        DescriptionField TEXT
+    )
+    ''')
+
+    database_connection.commit()
+    database_connection.close()
+#**** END DATABASE BUILDER ****
+
 
 #**** MAIN PROGRAM: ****
+
+#build a database of locations:
+build_database()
+
+#build a GUI:
+build_GUI()
+
 #button for submitting the user input:
 Button(main_window,text="submit",width=10, command = on_click).grid(row=5,column=1, sticky=W)
 
