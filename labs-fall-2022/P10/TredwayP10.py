@@ -7,6 +7,9 @@
 #   which of those locations you are closest to.
 # Reference to learn how to make GUI usuing tkinter:
 # https://www.youtube.com/watch?v=_PHJvjQJa3w&t=338s 
+#
+# example file path that I used on a mac:
+# /Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P10/five_locations.txt
 
 #**** IMPORT MODULES: ****
 from math import radians, sqrt, sin, cos, asin
@@ -80,71 +83,69 @@ class GeoPoint:
         '''
         shortest_distance = min(distance_to_points_list)
         index_of_closest_point = distance_to_points_list.index(shortest_distance)
-        print('\nThe closest point to you is: ')
-        print(location_list[index_of_closest_point].get_description())
-        print('Which is located at: ')
-        print(f'[{location_list[index_of_closest_point].get_lat()}, {location_list[index_of_closest_point].get_long()}]')
+
+        Label(main_window, text="").grid(row=15,column=0, sticky=W)
+
+        Label(main_window, text="The closest point to you is:").grid(row=16,column=0, sticky=W)
+
+        Label(main_window, text=f"{location_list[index_of_closest_point].get_description()}                ").grid(row=17,column=0, sticky=W)
+
+        Label(main_window, text="Which is located at: ").grid(row=18,column=0, sticky=W)
+
+        Label(main_window, text=f"({location_list[index_of_closest_point].get_lat()}, {location_list[index_of_closest_point].get_long()})").grid(row=19,column=0, sticky=W)
+
+        Label(main_window, text="").grid(row=20,column=0, sticky=W)
+
+        Label(main_window, text="You may resubmit new coordinates.").grid(row=21,column=0, sticky=W)
+
+        Label(main_window, text="Thank you for using GeoFinder App!", font=('Arial', 20)).grid(row=22,column=0, sticky=W)
+
+        Label(main_window, text="").grid(row=23,column=0, sticky=W)
 #**** END Class GeoPoint ****
 
-
-#**** FUNCTION DEFINITIONS FOR COMMMAND LINE: ****
-def display_header():
-    '''
-    Displays program introduction for the user.
-    '''
-    print("\n*****************************")
-    print(Program_name.upper())
-    print("This program will get the coordinates of your current location,")
-    print("then read five other remote locations from a file,")
-    print("and then tell you which one you are closest to.")
-
-def continue_loop():
-    '''
-    Asks user if they want to continue.
-    '''
-    user_input = input("\nDo you want to continue? ")
-    # this cleans the input so that any version of 'yes' works:
-    if len(user_input) > 0:
-        return user_input.strip()[0].lower() == 'y'
-    else: return False
-
-def display_distance(first_location, second_location, distance):
-    '''
-    Displays two locations and the distance between them.
-    '''
-    print(f"\nThe distance between {first_location} and {second_location} is {distance} km.")  
-
-def display_footer(program):
-    '''
-    Displays a farewell at the end of the program.
-    '''
-    print(f"\nThanks for using {program}!")
 
 #**** BUILD GUI: ****
 #create an instance of the Tk object and customize it:
 main_window = Tk()
 main_window.title("GeoFinder App")
-main_window.minsize(500,500)
+main_window.minsize(700,600)
 
-#display text labels:   (use grid() or pack() to add the item to the GUI window)
-Label(main_window, text="Welcome to the GeoFinder App!").grid(row=0,column=0)
-Label(main_window, text="Enter FULL PATH to your points list").grid(row=1,column=0)
-Label(main_window, text="(for example: /Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P9/five_locations.txt :").grid(row=2,column=0)
-Label(main_window, text="Enter your current latitude:").grid(row=3,column=0)
-Label(main_window, text="Enter your current longitude: ").grid(row=4,column=0)
+#display text labels:   
+'''
+use grid() or pack() to add the item to the GUI window
+use sticky=W to left justify (W means 'west')
+'''
+Label(main_window, text="Welcome to the GeoFinder App!", font=('Arial',25)).grid(row=0,column=0, sticky=W)
+Label(main_window, text="Enter the FULL PATH to your points list .txt file").grid(row=2,column=0, sticky=W)
+Label(main_window, text="Enter your current latitude:").grid(row=3,column=0, sticky=W)
+Label(main_window, text="Enter your current longitude: ").grid(row=4,column=0, sticky=W)
+
+#set default file location:
+default_file_loc = StringVar(main_window, value='five_locations.txt')
+
+#set default home coordinates:
+default_lat = StringVar(main_window, value='0.0')
+default_long = StringVar(main_window, value='0.0')
 
 #display text input boxes:
-file_location = Entry(main_window,width=50,borderwidth=5)
-file_location.grid(row=2,column=1)
-home_lat = Entry(main_window,width=10,borderwidth=5)
-home_lat.grid(row=3,column=1)
-home_long = Entry(main_window,width=10,borderwidth=5)
-home_long.grid(row=4,column=1)
+file_location = Entry(main_window,width=75,borderwidth=5,textvariable=default_file_loc)
+file_location.grid(row=2,column=1, sticky=W)
+home_lat = Entry(main_window,width=10,borderwidth=5,textvariable=default_lat)
+home_lat.grid(row=3,column=1, sticky=W)
+home_long = Entry(main_window,width=10,borderwidth=5,textvariable=default_long)
+home_long.grid(row=4,column=1, sticky=W)
+#*** END BASIC GUI SETUP ***
 
-#event listener function:
+
+'''
+EVENT LISTENER 
+When the button is clicked, this function gets the user input, 
+gets the 5 other points from a file, makes the GeoPoint objects, finds the closest point to home, and reports it to the GUI.
+'''
 def on_click():
-    Label(main_window, text=f"Your home latitude is: {home_lat.get()}").grid(row=5,column=0)
-    Label(main_window, text=f"Your home longitude is: {home_long.get()}").grid(row=6,column=0)
+
+    Label(main_window, text=f"Your current latitude is: {home_lat.get()}").grid(row=6,column=0, sticky=W)
+    Label(main_window, text=f"Your current longitude is: {home_long.get()}").grid(row=7,column=0, sticky=W)
 
     #instatiate a home point and five other points:
     home = GeoPoint()
@@ -188,6 +189,8 @@ def on_click():
         temp_file_location = file_location.get()
         f = open(temp_file_location, 'r')
     except FileNotFoundError:
+        Label(main_window, text="").grid(row=8,column=0, sticky=W)
+        Label(main_window, text="ERROR: enter the correct full path to the file where you are storing the five points.").grid(row=9,column=0, sticky=W)
         print('\nERROR:You need to enter the')
         print('correct full path for the file where you')
         print('are storing the five locations.')
@@ -204,12 +207,19 @@ def on_click():
             location_list.append(new_point)
 
     #report the five remote points that were read in from the file:
-    print("\nThe five remote locations that were read from the file are:")
-    print(f"{location_list[0].get_description()}: ({location_list[0].get_lat()}, {location_list[0].get_long()})")
-    print(f"{location_list[1].get_description()}: ({location_list[1].get_lat()}, {location_list[1].get_long()})")
-    print(f"{location_list[2].get_description()}: ({location_list[2].get_lat()}, {location_list[2].get_long()})")
-    print(f"{location_list[3].get_description()}: ({location_list[3].get_lat()}, {location_list[3].get_long()})")
-    print(f"{location_list[4].get_description()}: ({location_list[4].get_lat()}, {location_list[4].get_long()})")
+    Label(main_window, text="").grid(row=8,column=0, sticky=W)
+
+    Label(main_window, text="The five remote locations that were read from the file are:                                         ").grid(row=9,column=0, sticky=W)
+
+    Label(main_window, text=f"{location_list[0].get_description()}: ({location_list[0].get_lat()}, {location_list[0].get_long()})").grid(row=10,column=0, sticky=W)
+
+    Label(main_window, text=f"{location_list[1].get_description()}: ({location_list[1].get_lat()}, {location_list[1].get_long()})").grid(row=11,column=0, sticky=W)
+
+    Label(main_window, text=f"{location_list[2].get_description()}: ({location_list[2].get_lat()}, {location_list[2].get_long()})").grid(row=12,column=0, sticky=W)
+
+    Label(main_window, text=f"{location_list[3].get_description()}: ({location_list[3].get_lat()}, {location_list[3].get_long()})").grid(row=13,column=0, sticky=W)
+
+    Label(main_window, text=f"{location_list[4].get_description()}: ({location_list[4].get_lat()}, {location_list[4].get_long()})").grid(row=14,column=0, sticky=W)
 
     #calculate the distances from home to the five other points and store in a list:
     distances_to_five_points = []
@@ -218,12 +228,17 @@ def on_click():
 
     #tell the user which point they are closest to:
     home.display_closest_point(location_list,distances_to_five_points)
-    
+#**** END EVENT LISTENER FUNCTION which runs every time the button is clicked****
+
+
 #**** MAIN PROGRAM: ****
 #button for submitting the user input:
-Button(main_window,text="submit",width=10, command = on_click).grid(row=5,column=1)
+Button(main_window,text="submit",width=10, command = on_click).grid(row=5,column=1, sticky=W)
+
+#button for quitting app:
+Button(main_window,text="quit",width=10, command = quit).grid(row=23,column=1, sticky=E)
 
 #run the event listener loop:
 main_window.mainloop()
 
-display_footer(Program_name)
+#**** END MAIN ****

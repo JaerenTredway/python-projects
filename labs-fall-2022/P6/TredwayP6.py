@@ -70,7 +70,7 @@ def distance_between(first_location,second_location):
     # Haversine Formula:
     a = sin(d_lat/2)**2 + cos(lat1) * cos(lat2) * sin(d_long/2)**2
     c = 2 * asin(sqrt(a))
-    r = 6371 # radius of Earth in km
+    r = 6371 #radius of Earth in km (6378km is more accurate)
     distance = c * r
     return round(distance,2)
 
