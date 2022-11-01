@@ -14,6 +14,7 @@ from math import radians, sqrt, sin, cos, asin
 from operator import index, indexOf
 from tkinter import *
 import sqlite3
+import sys
 
 #**** GLOBAL VARIABLES: **** (are capitalized)
 Program_name = "GeoFinder App"
@@ -127,13 +128,13 @@ def build_GUI():
     Label(main_window, text="Enter your current longitude: ").grid(row=4,column=0, sticky=W)
 
     #set default file location:
-    default_file_loc = StringVar(main_window, value='five_locations.txt')
+    default_file_loc = StringVar(main_window, value='/Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P10/five_locations.txt')
 
     #set default home coordinates:
     default_lat = StringVar(main_window, value='0.0')
     default_long = StringVar(main_window, value='0.0')
 
-    #display text input boxes:
+    #display the text input boxes:
     file_location = Entry(main_window,width=75,borderwidth=5,textvariable=default_file_loc)
     file_location.grid(row=2,column=1, sticky=W)
     home_lat = Entry(main_window,width=10,borderwidth=5,textvariable=default_lat)
@@ -141,6 +142,59 @@ def build_GUI():
     home_long = Entry(main_window,width=10,borderwidth=5,textvariable=default_long)
     home_long.grid(row=4,column=1, sticky=W)
 #**** END GUI BUILDER ****
+
+def build_database():
+    '''
+    This function builds a database of locations with 
+    each place's latitude, longitude, and description.
+    '''
+    #make connection to database file:
+    database_connection = sqlite3.connect("/Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P11/my_database.db")
+
+    #make a cursor to execute SQL querries:
+    my_cursor = database_connection.cursor()
+
+    #delete the old table:
+    my_cursor.execute('''
+    DROP TABLE IF EXISTS my_table
+    ''')
+
+    #creat a new table in the database:
+    my_cursor.execute('''
+    CREATE TABLE my_table(
+        LatColumn FLOAT,
+        LongColumn FLOAT,
+        DescriptionColumn TEXT
+    )
+    ''')
+
+    database_connection.commit()
+
+    #insert data into the table:
+    my_cursor.execute('''
+    INSERT INTO my_table(
+        LatColumn,
+        LongColumn,
+        DescriptionColumn
+    )
+    VALUES 
+        (100.200, 123.456, 'Main Campus'),
+        (120.33, 142.345, 'Montoya'),
+        (153.23, 322.345, 'Rio Rancho'),
+        (133.23, 143.345, 'STEMULUS Center'),
+        (153.42, 122.345, 'ATC')
+    ''')
+
+    database_connection.commit()
+    
+    #see if there is anything in the database:
+    with database_connection:
+        my_cursor.execute("SELECT * FROM my_table")
+        print(my_cursor.fetchall())
+
+    # database_connection.close()
+    print('AND WHY')
+#**** END build_database() ****
 
 def on_click():
     '''
@@ -234,38 +288,43 @@ def on_click():
     home.display_closest_point(location_list,distances_to_five_points)
 #**** END EVENT LISTENER FUNCTION which runs every time the button is clicked****
 
-def build_database():
-    '''
-    This function builds a database of locations with 
-    each place's latitude, longitude, and description.
-    '''
-    #make connection to database:
-    database_connection = sqlite3.connect("geopoint_database.db")
-
-    #make a cursor to execute SQL querries:
-    cursor_1 = database_connection.cursor()
-
-    #creat a table in the database:
-    cursor_1.execute('''
-    CREATE TABLE geo_points(
-        LatField FLOAT,
-        LongField FLOAT,
-        DescriptionField TEXT
-    )
-    ''')
-
-    database_connection.commit()
-    database_connection.close()
-#**** END DATABASE BUILDER ****
-
 
 #**** MAIN PROGRAM: ****
 
+#**** build a GUI: ****
+#create an instance of the Tk object and customize it:
+main_window = Tk()
+main_window.title("GeoFinder App")
+main_window.minsize(700,600)
+
+#display text labels:   
+'''
+use grid() or pack() to add the item to the GUI window
+use sticky=W to left justify (W means 'west')
+'''
+Label(main_window, text="Welcome to the GeoFinder App!", font=('Arial',25)).grid(row=0,column=0, sticky=W)
+Label(main_window, text="Enter the FULL PATH to your points list .txt file").grid(row=2,column=0, sticky=W)
+Label(main_window, text="Enter your current latitude:").grid(row=3,column=0, sticky=W)
+Label(main_window, text="Enter your current longitude: ").grid(row=4,column=0, sticky=W)
+
+#set default file location:
+default_file_loc = StringVar(main_window, value='/Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P10/five_locations.txt')
+
+#set default home coordinates:
+default_lat = StringVar(main_window, value='0.0')
+default_long = StringVar(main_window, value='0.0')
+
+#display the text input boxes:
+file_location = Entry(main_window,width=75,borderwidth=5,textvariable=default_file_loc)
+file_location.grid(row=2,column=1, sticky=W)
+home_lat = Entry(main_window,width=10,borderwidth=5,textvariable=default_lat)
+home_lat.grid(row=3,column=1, sticky=W)
+home_long = Entry(main_window,width=10,borderwidth=5,textvariable=default_long)
+home_long.grid(row=4,column=1, sticky=W)
+#**** END GUI BUILDER ****
+
 #build a database of locations:
 build_database()
-
-#build a GUI:
-build_GUI()
 
 #button for submitting the user input:
 Button(main_window,text="submit",width=10, command = on_click).grid(row=5,column=1, sticky=W)
@@ -273,7 +332,7 @@ Button(main_window,text="submit",width=10, command = on_click).grid(row=5,column
 #button for quitting app:
 Button(main_window,text="quit",width=10, command = quit).grid(row=23,column=1, sticky=E)
 
-#run the event listener loop:
+#run the event listener loop that listens for button clicks:
 main_window.mainloop()
 
 #**** END MAIN ****
