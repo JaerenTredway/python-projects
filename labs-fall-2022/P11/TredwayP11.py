@@ -1,23 +1,21 @@
 # TredwayP11
 # Programmer: Will Tredway (Jaeren William Tredway)
 # EMail: jtredway@cnm.edu
-# Purpose: This program will make a GUI and ask for the file path
-#   of the file that has a database of points, then it will get the 
-#   coordinates of your home location, then it will tell you 
-#   which of those locations you are closest to.
-#
-# example file path that I used on a mac:
-# /Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P10/five_locations.txt
+# Purpose: This program will make a GUI and a database, and 
+#   get five remote points from the database, then 
+#   it will get the coordinates of your home location, then 
+#   it will tell you which of those locations from the 
+#   database that you are closest to.
+# database location URL for my system:
+#   /Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P11/my_database.db
 
 #**** IMPORT MODULES: ****
 from math import radians, sqrt, sin, cos, asin
-from operator import index, indexOf
 from tkinter import *
 import sqlite3
-import sys
 
-#**** GLOBAL VARIABLES: **** (are capitalized)
-Program_name = "GeoFinder App"
+#**** GLOBAL VARIABLES: **** 
+database_location = ""
 
 #**** CLASS DEFINITIONS: ****
 class GeoPoint:
@@ -88,11 +86,11 @@ class GeoPoint:
 
         Label(main_window, text="The closest point to you is:").grid(row=16,column=0, sticky=W)
 
-        Label(main_window, text=f"{location_list[index_of_closest_point].get_description()}                ").grid(row=17,column=0, sticky=W)
+        Label(main_window, text=f"{location_list[index_of_closest_point].get_description()}                          ").grid(row=17,column=0, sticky=W)
 
         Label(main_window, text="Which is located at: ").grid(row=18,column=0, sticky=W)
 
-        Label(main_window, text=f"({location_list[index_of_closest_point].get_lat()}, {location_list[index_of_closest_point].get_long()})").grid(row=19,column=0, sticky=W)
+        Label(main_window, text=f"({location_list[index_of_closest_point].get_lat()}, {location_list[index_of_closest_point].get_long()})    ").grid(row=19,column=0, sticky=W)
 
         Label(main_window, text="").grid(row=20,column=0, sticky=W)
 
@@ -106,50 +104,14 @@ class GeoPoint:
 
 #**** FUNCTION DEFINITIONS: ****
 
-def build_GUI():
-    '''
-    This function builds the main windoe=w of the GUI
-    with text Labels and text Entry boxes.
-    '''
-
-    #create an instance of the Tk object and customize it:
-    main_window = Tk()
-    main_window.title("GeoFinder App")
-    main_window.minsize(700,600)
-
-    #display text labels:   
-    '''
-    use grid() or pack() to add the item to the GUI window
-    use sticky=W to left justify (W means 'west')
-    '''
-    Label(main_window, text="Welcome to the GeoFinder App!", font=('Arial',25)).grid(row=0,column=0, sticky=W)
-    Label(main_window, text="Enter the FULL PATH to your points list .txt file").grid(row=2,column=0, sticky=W)
-    Label(main_window, text="Enter your current latitude:").grid(row=3,column=0, sticky=W)
-    Label(main_window, text="Enter your current longitude: ").grid(row=4,column=0, sticky=W)
-
-    #set default file location:
-    default_file_loc = StringVar(main_window, value='/Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P10/five_locations.txt')
-
-    #set default home coordinates:
-    default_lat = StringVar(main_window, value='0.0')
-    default_long = StringVar(main_window, value='0.0')
-
-    #display the text input boxes:
-    file_location = Entry(main_window,width=75,borderwidth=5,textvariable=default_file_loc)
-    file_location.grid(row=2,column=1, sticky=W)
-    home_lat = Entry(main_window,width=10,borderwidth=5,textvariable=default_lat)
-    home_lat.grid(row=3,column=1, sticky=W)
-    home_long = Entry(main_window,width=10,borderwidth=5,textvariable=default_long)
-    home_long.grid(row=4,column=1, sticky=W)
-#**** END GUI BUILDER ****
-
 def build_database():
     '''
     This function builds a database of locations with 
     each place's latitude, longitude, and description.
     '''
     #make connection to database file:
-    database_connection = sqlite3.connect("/Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P11/my_database.db")
+    print("\nDATABASE LOCATION: ", database_location)
+    database_connection = sqlite3.connect(database_location)
 
     #make a cursor to execute SQL querries:
     my_cursor = database_connection.cursor()
@@ -179,10 +141,10 @@ def build_database():
     )
     VALUES 
         (100.200, 123.456, 'Main Campus'),
-        (120.33, 142.345, 'Montoya'),
-        (153.23, 322.345, 'Rio Rancho'),
-        (133.23, 143.345, 'STEMULUS Center'),
-        (153.42, 122.345, 'ATC')
+        (120.330, 142.345, 'Montoya'),
+        (153.230, 322.345, 'Rio Rancho'),
+        (133.230, 143.345, 'STEMULUS Center'),
+        (153.420, 122.345, 'ATC')
     ''')
 
     database_connection.commit()
@@ -190,10 +152,9 @@ def build_database():
     #see if there is anything in the database:
     with database_connection:
         my_cursor.execute("SELECT * FROM my_table")
+        print("Database contents: ")
         print(my_cursor.fetchall())
-
-    # database_connection.close()
-    print('AND WHY')
+    database_connection.close()
 #**** END build_database() ****
 
 def on_click():
@@ -202,10 +163,16 @@ def on_click():
     When the button is clicked, this function gets the user input, 
     gets the 5 other points from a file, makes the GeoPoint objects, finds the closest point to home, and reports it to the GUI.
     '''
+    
+    #make a string from the database location Entry:
+    global database_location
+    database_location = database_location_entry.get()
+    build_database()
+
     Label(main_window, text=f"Your current latitude is: {home_lat.get()}").grid(row=6,column=0, sticky=W)
     Label(main_window, text=f"Your current longitude is: {home_long.get()}").grid(row=7,column=0, sticky=W)
 
-    #instatiate a home point and five other points:
+    #instantiate a home point and five other points:
     home = GeoPoint()
     location_1 = GeoPoint()
     location_2 = GeoPoint()
@@ -240,34 +207,33 @@ def on_click():
     except Exception as e:
         print("Something went wrong:", e)
 
-    #read in the five other points from a file:
-    try:
-        # f = open('five_locations.txt', 'r')
-        # /Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P9/five_locations.txt
-        temp_file_location = file_location.get()
-        f = open(temp_file_location, 'r')
-    except FileNotFoundError:
-        Label(main_window, text="").grid(row=8,column=0, sticky=W)
-        Label(main_window, text="ERROR: enter the correct full path to the file where you are storing the five points.").grid(row=9,column=0, sticky=W)
-        print('\nERROR:You need to enter the')
-        print('correct full path for the file where you')
-        print('are storing the five locations.')
-    except Exception as e:
-        print("Something went wrong: ", e)
-    location_list = []
-    with f as filestream:
-        for line in filestream:
-            current_line = line.split(',')
-            new_point = GeoPoint()
-            new_point.set_lat(float(current_line[0]))
-            new_point.set_long(float(current_line[1]))
-            new_point.set_description(current_line[2][:-1])
-            location_list.append(new_point)
+#read in the five other points from the database:
+    #make connection to the database file:
+    database_connection = sqlite3.connect(database_location)
 
-    #report the five remote points that were read in from the file:
+    #make a cursor to execute SQL querries:
+    my_cursor = database_connection.cursor()
+    
+    #fetch the contents of the database:
+    with database_connection:
+        my_cursor.execute("SELECT * FROM my_table")
+        raw_list = list(my_cursor.fetchall())
+
+    database_connection.close()
+
+    #make another list of the 5 GeoPoint objects:
+    location_list = []
+    for line in raw_list:
+        new_point = GeoPoint()
+        new_point.set_lat(float(line[0]))
+        new_point.set_long(float(line[1]))
+        new_point.set_description(line[2])
+        location_list.append(new_point)
+
+    #report the five remote points that were read in from the database:
     Label(main_window, text="").grid(row=8,column=0, sticky=W)
 
-    Label(main_window, text="The five remote locations that were read from the file are:                                         ").grid(row=9,column=0, sticky=W)
+    Label(main_window, text="The five remote locations that were read from the database are:                                         ").grid(row=9,column=0, sticky=W)
 
     Label(main_window, text=f"{location_list[0].get_description()}: ({location_list[0].get_lat()}, {location_list[0].get_long()})").grid(row=10,column=0, sticky=W)
 
@@ -286,7 +252,7 @@ def on_click():
 
     #tell the user which point they are closest to:
     home.display_closest_point(location_list,distances_to_five_points)
-#**** END EVENT LISTENER FUNCTION which runs every time the button is clicked****
+#**** END EVENT LISTENER on_click() which runs every time the button is clicked****
 
 
 #**** MAIN PROGRAM: ****
@@ -303,34 +269,32 @@ use grid() or pack() to add the item to the GUI window
 use sticky=W to left justify (W means 'west')
 '''
 Label(main_window, text="Welcome to the GeoFinder App!", font=('Arial',25)).grid(row=0,column=0, sticky=W)
-Label(main_window, text="Enter the FULL PATH to your points list .txt file").grid(row=2,column=0, sticky=W)
+Label(main_window, text="Enter the FULL PATH to your database .db file").grid(row=2,column=0, sticky=W)
 Label(main_window, text="Enter your current latitude:").grid(row=3,column=0, sticky=W)
 Label(main_window, text="Enter your current longitude: ").grid(row=4,column=0, sticky=W)
 
-#set default file location:
-default_file_loc = StringVar(main_window, value='/Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P10/five_locations.txt')
+#set default database file location:
+#default_file_loc = StringVar(main_window, value='/Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P11/my_database.db')
+default_file_loc = StringVar(main_window, value='')
 
 #set default home coordinates:
 default_lat = StringVar(main_window, value='0.0')
 default_long = StringVar(main_window, value='0.0')
 
 #display the text input boxes:
-file_location = Entry(main_window,width=75,borderwidth=5,textvariable=default_file_loc)
-file_location.grid(row=2,column=1, sticky=W)
+database_location_entry = Entry(main_window,width=75,borderwidth=5,textvariable=default_file_loc)
+database_location_entry.grid(row=2,column=1, sticky=W)
 home_lat = Entry(main_window,width=10,borderwidth=5,textvariable=default_lat)
 home_lat.grid(row=3,column=1, sticky=W)
 home_long = Entry(main_window,width=10,borderwidth=5,textvariable=default_long)
 home_long.grid(row=4,column=1, sticky=W)
 #**** END GUI BUILDER ****
 
-#build a database of locations:
-build_database()
-
-#button for submitting the user input:
+#button for submitting the user input coordinates and database loc:
 Button(main_window,text="submit",width=10, command = on_click).grid(row=5,column=1, sticky=W)
 
 #button for quitting app:
-Button(main_window,text="quit",width=10, command = quit).grid(row=23,column=1, sticky=E)
+Button(main_window,text="quit",width=10, command = quit).grid(row=23,column=2, sticky=E)
 
 #run the event listener loop that listens for button clicks:
 main_window.mainloop()
