@@ -1,13 +1,13 @@
 # TredwayP12
 # Programmer: Will Tredway (Jaeren William Tredway)
 # EMail: jtredway@cnm.edu
-# Purpose: This program will expand on previous labs. It will add a GUI class so
-#   I can make a GUI object and get that out of the MAIN. I'll also make a 
-#   Database class rather than just a database builder function. Then I will
-#   populate the database with restaurants and use the GUI to find the nearest
-#   restaurant of a certain type to the user. 
+# Purpose: This final project will expand on previous labs. It will build a GUI and
+#   a Database , then it will populate the database with restaurants and use the GUI's input to 
+#   identify the nearest restaurant of a certain type to the user. 
 # database location URL for my system:
 #   /Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P12/my_database.db
+# reference:
+#   https://stackoverflow.com/questions/24911805/change-the-value-of-a-variable-with-a-button-tkinter
 
 #**** IMPORT MODULES: ****
 from math import radians, sqrt, sin, cos, asin
@@ -18,8 +18,10 @@ from tkinter import font
 #**** GLOBAL VARIABLES: **** 
 # the full path url to the .db file, which will be input into the GUI:
 database_location = ""
-# the list of Restaurant objects that have the restaurant locations:
+# the list of Restaurant class objects that have the restaurant locations:
 restaurant_list = []
+# keep track of what type of food the user wants:
+food_type = "nothing"
 
 #**** CLASS DEFINITIONS: ****
 class Restaurant:
@@ -29,7 +31,6 @@ class Restaurant:
         self.long = 0.00
         self.name = ""
         self.type = ""
-
 
     #class methods:    
     def set_lat(self,lat):
@@ -115,14 +116,20 @@ def build_database():
     #make a cursor to execute SQL querries:
     my_cursor = database_connection.cursor()
 
-    #delete the old table:
+    #delete the old tables:
     my_cursor.execute('''
-    DROP TABLE IF EXISTS my_table
+    DROP TABLE IF EXISTS chinese_table
+    ''')
+    my_cursor.execute('''
+    DROP TABLE IF EXISTS american_table
+    ''')
+    my_cursor.execute('''
+    DROP TABLE IF EXISTS mexican_table
     ''')
 
-    #creat a new table in the database:
+    #create a new Chinese table in the database:
     my_cursor.execute('''
-    CREATE TABLE my_table(
+    CREATE TABLE chinese_table(
         LatColumn FLOAT,
         LongColumn FLOAT,
         NameColumn TEXT,
@@ -134,60 +141,115 @@ def build_database():
 
     #insert data into the table:
     my_cursor.execute('''
-    INSERT INTO my_table(
+    INSERT INTO chinese_table(
         LatColumn,
         LongColumn,
         NameColumn,
         TypeColumn
     )
     VALUES 
-        (100.200, 123.456, "Chang's", 'Chinese'),
-        (120.330, 142.345, 'East Ocean', 'Chinese'),
-        (153.230, 322.345, 'Hunan', 'Chinese'),
+        (10.200, 12.456, "Chang's", 'Chinese'),
+        (20.330, 42.345, 'East Ocean', 'Chinese'),
+        (53.230, 122.345, 'Hunan', 'Chinese'),
         (133.230, 143.345, 'Qwon Wong', 'Chinese'),
-        (153.420, 122.345, 'Spicy Wonton', 'Chinese'),
-        (100.200, 123.456, "McDonald's", 'American'),
-        (120.330, 142.345, 'Burger King', 'American'),
-        (153.230, 322.345, "Wendy's", 'American'),
-        (133.230, 143.345, 'Sonic', 'American'),
-        (153.420, 122.345, "Carl's Jr.", 'American'),
-        (100.200, 123.456, "Garcia's", 'Mexican'),
-        (120.330, 142.345, 'Taco House', 'Mexican'),
-        (153.230, 322.345, "Sadie's", 'Mexican'),
-        (133.230, 143.345, 'Frontier', 'Mexican'),
-        (153.420, 122.345, 'Green Chili Monster', 'Mexican')
+        (253.420, 322.345, 'Spicy Wonton', 'Chinese')
     ''')
 
     database_connection.commit()
+    #**** END Chinese Table
+
+
+    #create a new American table in the database:
+    my_cursor.execute('''
+    CREATE TABLE american_table(
+        LatColumn FLOAT,
+        LongColumn FLOAT,
+        NameColumn TEXT,
+        TypeColumn TEXT
+    )
+    ''')
+
+    database_connection.commit()
+
+    #insert data into the table:
+    my_cursor.execute('''
+    INSERT INTO american_table(
+        LatColumn,
+        LongColumn,
+        NameColumn,
+        TypeColumn
+    )
+    VALUES 
+        (10.1, 20.5, "McDonald's", 'American'),
+        (50.1, 165.2, 'Burger King', 'American'),
+        (171.1, 80.5, "Wendy's", 'American'),
+        (189.9, 279.9, 'Sonic', 'American'),
+        (300.6, 301.8, "Carl's Jr.", 'American')
+    ''')
+
+    database_connection.commit()
+    #**** END American Table
+
+
+    #create a new Mexican table in the database:
+    my_cursor.execute('''
+    CREATE TABLE mexican_table(
+        LatColumn FLOAT,
+        LongColumn FLOAT,
+        NameColumn TEXT,
+        TypeColumn TEXT
+    )
+    ''')
+
+    database_connection.commit()
+
+    #insert data into the table:
+    my_cursor.execute('''
+    INSERT INTO mexican_table(
+        LatColumn,
+        LongColumn,
+        NameColumn,
+        TypeColumn
+    )
+    VALUES 
+        (10.200, 23.456, "Garcia's", 'Mexican'),
+        (20.330, 42.345, 'Taco House', 'Mexican'),
+        (53.230, 122.345, "Sadie's", 'Mexican'),
+        (133.230, 143.345, 'Frontier', 'Mexican'),
+        (153.420, 222.345, 'Green Chili Monster', 'Mexican')
+    ''')
+
+    database_connection.commit()
+    #**** END Mexican Table
     
-    #see if there is anything in the database:
+
+    #print the contents of the databases:
     with database_connection:
-        my_cursor.execute("SELECT * FROM my_table")
-        print("Database contents: ")
+        print("\nDatabase contents: ")
+        my_cursor.execute("SELECT * FROM chinese_table")
+        print(my_cursor.fetchall())
+        my_cursor.execute("SELECT * FROM american_table")
+        print(my_cursor.fetchall())
+        my_cursor.execute("SELECT * FROM mexican_table")
         print(my_cursor.fetchall())
     database_connection.close()
 #**** END build_database() ****
 
 def on_click():
-    '''
-    EVENT LISTENER 
+    ''' 
     When a button is clicked, this function gets the user input,
     builds the database, gets the data from the database, makes the Restaurant objects, 
     finds the closest restaurant to home, and reports it to the GUI.
     '''
     
-    #make a string from the database location Entry:
+    #make a string from the database location Entry (for where the .db file is located):
     global database_location
     database_location = database_location_entry.get()
+
     build_database()
 
-    #instantiate a home point and fifteen other points:
+    #instantiate a home point:
     home = Restaurant()
-    location_1 = Restaurant()
-    location_2 = Restaurant()
-    location_3 = Restaurant()
-    location_4 = Restaurant()
-    location_5 = Restaurant()
 
     #get user input for the value of the home point:
     try:
@@ -223,34 +285,81 @@ def on_click():
     #make a cursor to execute SQL querries:
     my_cursor = database_connection.cursor()
     
-    #fetch the contents of the database into a local list:
+    #fetch the contents of the database into local lists:
     with database_connection:
-        my_cursor.execute("SELECT * FROM my_table")
-        raw_list = list(my_cursor.fetchall())
+        my_cursor.execute("SELECT * FROM chinese_table")
+        local_chinese_data = list(my_cursor.fetchall())
+        my_cursor.execute("SELECT * FROM american_table")
+        local_american_data = list(my_cursor.fetchall())
+        my_cursor.execute("SELECT * FROM mexican_table")
+        local_mexican_data = list(my_cursor.fetchall())
 
     database_connection.close()
 
-    #make a second list with Restaurant objects from the local data dump:
-    restaurant_list = []
-    for line in raw_list:
+    #create a second list with Restaurant objects using the local data dump:
+    chinese_list = []
+    for line in local_chinese_data:
         new_restaurant = Restaurant()
         new_restaurant.set_lat(float(line[0]))
         new_restaurant.set_long(float(line[1]))
         new_restaurant.set_name(line[2])
         new_restaurant.set_type(line[3])
-        restaurant_list.append(new_restaurant)
+        chinese_list.append(new_restaurant)
+    american_list = []
+    for line in local_american_data:
+        new_restaurant = Restaurant()
+        new_restaurant.set_lat(float(line[0]))
+        new_restaurant.set_long(float(line[1]))
+        new_restaurant.set_name(line[2])
+        new_restaurant.set_type(line[3])
+        american_list.append(new_restaurant)
+    mexican_list = []
+    for line in local_mexican_data:
+        new_restaurant = Restaurant()
+        new_restaurant.set_lat(float(line[0]))
+        new_restaurant.set_long(float(line[1]))
+        new_restaurant.set_name(line[2])
+        new_restaurant.set_type(line[3])
+        mexican_list.append(new_restaurant)
 
-    #example Label for reporting the restaurants that were read in from the database:
+    #reminder Label for reporting the restaurants that were read in from the database:
     #Label(main_window, text=f"{location_list[4].get_description()}: ({location_list[4].get_lat()}, {location_list[4].get_long()})").grid(row=14,column=0, sticky=W)
 
     #calculate the distances from 'home' to the restaurants and store them in a list:
-    distances_to_restaurants = []
-    for x in range(5):
-        distances_to_restaurants.append(home.calc_distance(restaurant_list[x].get_lat(),restaurant_list[x].get_long()))
+    if food_type == "nothing":
+        #display on GUI:
+        Label(main_window, text=f"PICK THE FOOD YOU WANT!     ").grid(row=10,column=0, sticky=W)
+    elif food_type == "Chinese":
+        distance_to_chinese = []
+        for x in range(5):
+            distance_to_chinese.append(home.calc_distance(chinese_list[x].get_lat(),chinese_list[x].get_long()))
+        #tell the user which restaurant they are closest to:
+        home.display_closest_restaurant(chinese_list,distance_to_chinese)
+    elif food_type == "American":
+        distance_to_american = []
+        for x in range(5):
+            distance_to_american.append(home.calc_distance(american_list[x].get_lat(),american_list[x].get_long()))
+            #tell the user which restaurant they are closest to:
+            home.display_closest_restaurant(american_list,distance_to_american)
+    elif food_type == "Mexican":
+        distance_to_mexican = []
+        for x in range(5):
+            distance_to_mexican.append(home.calc_distance(mexican_list[x].get_lat(),mexican_list[x].get_long()))
+            #tell the user which restaurant they are closest to:
+            home.display_closest_restaurant(mexican_list,distance_to_mexican)
+#**** END on_click() which runs every time the submit button is clicked
 
-    #tell the user which restaurant they are closest to:
-    home.display_closest_restaurant(restaurant_list,distances_to_restaurants)
-#**** END EVENT LISTENER on_click() which runs every time the submit button is clicked****
+
+def assign_food_type(value):
+    '''
+    This will take the food-type-button input and assign the type of food the user wants
+    '''
+    global food_type
+    food_type = value
+    print(f"Your food selection is {food_type}")
+    #Display type of food chosen on GUI:
+    Label(main_window, text=f"You have chosen {food_type}!           ").grid(row=10,column=0, sticky=W)
+#**** END assign_food_type() which runs every time the food buttons are clicked.
 
 
 #**** MAIN PROGRAM: ****
@@ -293,10 +402,15 @@ home_lat.grid(row=5,column=1, sticky=W)
 home_long = Entry(main_window,width=10,borderwidth=5,textvariable=default_long)
 home_long.grid(row=6,column=1, sticky=W)
 
-#buttons for submitting the type of food wanted:
-Button(main_window,text="Chinese",width=10, command = on_click).grid(row=7,column=1, sticky=W)
-Button(main_window,text="American",width=10, command = on_click).grid(row=8,column=1, sticky=W)
-Button(main_window,text="Mexican",width=10, command = on_click).grid(row=9,column=1, sticky=W)
+#buttons for submitting the type of food wanted and main request submission:
+Button(main_window,text="Chinese",width=10, command=lambda *args: assign_food_type("Chinese")).grid(row=7,column=1, sticky=W)
+Button(main_window,text="American",width=10, command=lambda *args: assign_food_type("American")).grid(row=8,column=1, sticky=W)
+Button(main_window,text="Mexican",width=10, command=lambda *args: assign_food_type("Mexican")).grid(row=9,column=1, sticky=W)
+Button(main_window, bg='green', text="SUBMIT REQUEST",width=20, command = on_click).grid(row=10,column=1, sticky=W)
+
+#Default for displaying type of food chosen on GUI:
+Label(main_window, text=f"You have chosen {food_type}!      ").grid(row=10,column=0, sticky=W)
+
 
 #button for quitting app:
 Button(main_window,text="quit",width=10, command = quit).grid(row=23,column=3, sticky=E)
