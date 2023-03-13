@@ -1,7 +1,7 @@
 # TredwayP12
 # Programmer: Will Tredway (Jaeren William Tredway)
 # EMail: jtredway@cnm.edu
-# Purpose: This final project will expand on previous labs. It will build a GUI and
+# Purpose: This project will expand on previous labs. It will build a GUI and
 #   a Database , then it will populate the database with restaurants and use the GUI's input to 
 #   identify the nearest restaurant of a certain type to the user. 
 # database location URL for my system:
@@ -17,7 +17,7 @@ from tkinter import font
 
 #**** GLOBAL VARIABLES: **** 
 # the full path url to the .db file, which will be input into the GUI:
-database_location = ""
+database_location = "/Users/jaeren/Desktop/git-repos/python-projects/labs-fall-2022/P12/my_database.db"
 # the list of Restaurant class objects that have the restaurant locations:
 restaurant_list = []
 # keep track of what type of food the user wants:
@@ -388,7 +388,7 @@ Label(main_window, text="Enter your current longitude: ").grid(row=6,column=0, s
 Label(main_window, text="What kind of food do you want: ").grid(row=7,column=0, sticky=W)
 
 #set default database file location:
-default_file_loc = StringVar(main_window, value='/Users/jaeren/Desktop/local-git-repos/python-projects/labs-fall-2022/P12/my_database.db')
+default_file_loc = StringVar(main_window, value='/Users/jaeren/Desktop/git-repos/python-projects/labs-fall-2022/P12/my_database.db')
 
 #set default home coordinates:
 default_lat = StringVar(main_window, value='0.0')
